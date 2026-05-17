@@ -280,7 +280,7 @@ function updateUI() {
   document.getElementById('nzRentAnnual').textContent   = fmtNeg(r.nz.rent, 'NZ$');
   document.getElementById('nzLivingAnnual').textContent = fmtNeg(r.nz.living, 'NZ$');
   document.getElementById('nzSavings').textContent      = fmt(r.nz.savings, 'NZ$');
-  document.getElementById('nzSuper').textContent        = fmt(r.nz.retireDisplay, 'NZ$'); // employer + govt only
+  document.getElementById('nzSuper').textContent        = fmt(r.nz.retireWealth, 'NZ$'); // employee + employer + govt (full KiwiSaver)
 
   // AU breakdown card
   document.getElementById('auGross').textContent        = fmt(r.au.gross, 'AU$');
@@ -512,7 +512,7 @@ function updateCharts(r, wealthData) {
   wealthChart.data.datasets[1].data = wealthData.au;
   wealthChart.update('none');
 
-  breakdownChart.data.datasets[0].data = [r.nz.gross, r.nz.tax, r.nz.acc, r.nz.slPayment, r.nz.rent, r.nz.living, r.nz.retireDisplay, r.nz.savings];
+  breakdownChart.data.datasets[0].data = [r.nz.gross, r.nz.tax, r.nz.acc, r.nz.slPayment, r.nz.rent, r.nz.living, r.nz.retireWealth, r.nz.savings];
   breakdownChart.data.datasets[1].data = [r.au.gross * fx, r.au.tax * fx, r.au.medicare * fx, r.au.slPayment * fx, r.au.rent * fx, r.au.living * fx, r.au.retireEmployer * fx, r.au.savings * fx];
   breakdownChart.update('none');
 }
