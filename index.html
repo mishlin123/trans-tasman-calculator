@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en-NZ">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Should I Move to Australia? A Trans-Tasman Calculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,400;9..144,500;9..144,600;9..144,700;9..144,800;9..144,900&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<div class="deco-blob deco-1"></div>
+<div class="deco-blob deco-2"></div>
+
+<div class="container">
+
+  <!-- Shared progress bar -->
+  <div id="stepProgress" class="step-progress" aria-label="Calculator progress"></div>
+
+  <!-- ===== STEP 1: Profile ===== -->
+  <div id="step-1" class="step-section step-active">
+    <header class="hero">
+      <p class="eyebrow">A trans-Tasman financial calculator</p>
+      <h1>Should I move to <span class="accent">Australia</span>?</h1>
+      <p class="hero-sub">An honest, numbers-first calculator for any New Zealander weighing the move. Pick your industry, adjust your salary, and get a personalised verdict in under two minutes.</p>
+    </header>
+
+    <div class="section-header">
+      <h2>Tell us <em>who you are</em></h2>
+      <p>Select your industry and experience level — this sets realistic baseline salaries you can adjust in the next step.</p>
+    </div>
+
+    <div class="input-card" style="max-width: 800px; margin-bottom: 24px;">
+      <h3>Industry</h3>
+      <div class="industry-grid" id="industrySelector">
+        <button class="option-btn active" data-ind="science">Science</button>
+        <button class="option-btn" data-ind="tech">Tech & IT</button>
+        <button class="option-btn" data-ind="health">Healthcare</button>
+        <button class="option-btn" data-ind="trades">Trades</button>
+        <button class="option-btn" data-ind="finance">Finance</button>
+      </div>
+
+      <h3>Experience Level</h3>
+      <div class="level-grid" id="levelSelector">
+        <button class="option-btn" data-lvl="junior">Junior<br><small style="font-weight:400;font-size:12px">0–3 yrs</small></button>
+        <button class="option-btn active" data-lvl="mid">Mid-Level<br><small style="font-weight:400;font-size:12px">3–8 yrs</small></button>
+        <button class="option-btn" data-lvl="senior">Senior<br><small style="font-weight:400;font-size:12px">8+ yrs</small></button>
+      </div>
+    </div>
+
+    <div class="wizard-controls">
+      <button class="btn-next" onclick="setStep(2)">Next: Your Income →</button>
+    </div>
+    <button class="skip-link" onclick="setStep(4)">Skip ahead with defaults →</button>
+  </div>
+
+  <!-- ===== STEP 2: Income ===== -->
+  <div id="step-2" class="step-section">
+    <div class="section-header">
+      <h2>Your <em>earning potential</em></h2>
+      <p>These are market estimates for your industry and level. Drag the sliders to match your actual offer or expectations — the verdict updates live.</p>
+    </div>
+
+    <div class="inputs-grid">
+      <div class="input-card">
+        <h3>Starting Salary</h3>
+        <p class="card-hint">Gross annual salary before tax, in each country's currency</p>
+
+        <div class="input-row">
+          <div class="input-label">
+            <span>NZ salary (gross, NZD)</span>
+            <span class="input-value">NZ$<span id="nzSalaryDisplay">70,000</span></span>
+          </div>
+          <input type="range" id="nzSalary" min="40000" max="250000" step="1000" value="70000">
+        </div>
+
+        <div class="input-row">
+          <div class="input-label">
+            <span>AU salary (gross, AUD)</span>
+            <span class="input-value">AU$<span id="auSalaryDisplay">85,000</span></span>
+          </div>
+          <input type="range" id="auSalary" min="50000" max="300000" step="1000" value="85000">
+        </div>
+
+        <p style="font-size:13px;color:var(--ink-soft);margin-top:16px;font-style:italic;">Exchange rate: 1 AUD = 1.223 NZD (mid-May 2026). AU salaries are shown in AUD and converted to NZD for comparison.</p>
+      </div>
+    </div>
+
+    <div class="wizard-controls">
+      <button class="btn-back" onclick="setStep(1)">← Back</button>
+      <button class="btn-next" onclick="setStep(3)">Next: Your Expenses →</button>
+    </div>
+    <button class="skip-link" onclick="setStep(4)">Skip ahead with current values →</button>
+  </div>
+
+  <!-- ===== STEP 3: Expenses ===== -->
+  <div id="step-3" class="step-section">
+    <div class="section-header">
+      <h2>Your <em>expenses & horizon</em></h2>
+      <p>Factor in your student loan, living costs, and the upfront cost of the move. All sliders are pre-filled with typical figures — adjust anything that doesn't match your situation.</p>
+    </div>
+
+    <div class="inputs-grid">
+      <div class="input-card">
+        <h3>Your student loan</h3>
+        <p class="card-hint">NZ student loans are interest-free at home, but accrue 5.6% interest per year if you move overseas</p>
+        <div class="input-row">
+          <div class="input-label">
+            <span>Current loan balance</span>
+            <span class="input-value">NZ$<span id="loanDisplay">35,000</span></span>
+          </div>
+          <input type="range" id="loan" min="0" max="100000" step="1000" value="35000">
+        </div>
+        <p style="font-size:13px;color:var(--ink-soft);margin-top:4px;">Set to $0 if you have no loan or it's already paid off.</p>
+      </div>
+
+      <div class="input-card">
+        <h3>Your housing</h3>
+        <p class="card-hint">Typical room rent in a shared flat. Rent is per week; all other costs per month.</p>
+
+        <div class="input-row">
+          <div class="input-label"><span>NZ rent (per week)</span><span class="input-value">NZ$<span id="nzRentDisplay">220</span></span></div>
+          <input type="range" id="nzRent" min="120" max="500" step="10" value="220">
+        </div>
+        <div class="input-row">
+          <div class="input-label"><span>AU rent (per week)</span><span class="input-value">AU$<span id="auRentDisplay">300</span></span></div>
+          <input type="range" id="auRent" min="150" max="600" step="10" value="300">
+        </div>
+
+        <div class="input-row">
+          <div class="input-label"><span>Food & groceries — NZ (per month)</span><span class="input-value">NZ$<span id="nzFoodDisplay">400</span></span></div>
+          <input type="range" id="nzFood" min="200" max="1000" step="10" value="400">
+        </div>
+        <div class="input-row">
+          <div class="input-label"><span>Food & groceries — AU (per month)</span><span class="input-value">AU$<span id="auFoodDisplay">550</span></span></div>
+          <input type="range" id="auFood" min="200" max="1000" step="10" value="550">
+        </div>
+
+        <div class="input-row">
+          <div class="input-label"><span>Transport — NZ (per month)</span><span class="input-value">NZ$<span id="nzTransportDisplay">150</span></span></div>
+          <input type="range" id="nzTransport" min="0" max="500" step="10" value="150">
+        </div>
+        <div class="input-row">
+          <div class="input-label"><span>Transport — AU (per month)</span><span class="input-value">AU$<span id="auTransportDisplay">200</span></span></div>
+          <input type="range" id="auTransport" min="0" max="500" step="10" value="200">
+        </div>
+
+        <div class="input-row">
+          <div class="input-label"><span>Bills & utilities — NZ (per month)</span><span class="input-value">NZ$<span id="nzBillsDisplay">200</span></span></div>
+          <input type="range" id="nzBills" min="0" max="500" step="10" value="200">
+        </div>
+        <div class="input-row">
+          <div class="input-label"><span>Bills & utilities — AU (per month)</span><span class="input-value">AU$<span id="auBillsDisplay">250</span></span></div>
+          <input type="range" id="auBills" min="0" max="500" step="10" value="250">
+        </div>
+
+        <div class="input-row">
+          <div class="input-label"><span>Entertainment & misc — NZ (per month)</span><span class="input-value">NZ$<span id="nzEntDisplay">420</span></span></div>
+          <input type="range" id="nzEnt" min="0" max="1500" step="10" value="420">
+        </div>
+        <div class="input-row">
+          <div class="input-label"><span>Entertainment & misc — AU (per month)</span><span class="input-value">AU$<span id="auEntDisplay">620</span></span></div>
+          <input type="range" id="auEnt" min="0" max="1500" step="10" value="620">
+        </div>
+      </div>
+
+      <div class="input-card">
+        <h3>Your horizon</h3>
+        <p class="card-hint">Investment return and upfront move cost</p>
+
+        <div class="input-row">
+          <div class="input-label">
+            <span>Annual salary growth (real, above inflation)</span>
+            <span class="input-value"><span id="salaryGrowthDisplay">2.0</span>%</span>
+          </div>
+          <input type="range" id="salaryGrowth" min="0" max="6" step="0.5" value="2">
+          <p style="font-size:12px;color:var(--ink-soft);margin-top:6px;">Career progression in real terms. 2% is a reasonable default; AU's larger job market often supports faster progression. Set to 0% to model a flat-salary scenario.</p>
+        </div>
+
+        <div class="input-row">
+          <div class="input-label">
+            <span>Investment return (real, after inflation)</span>
+            <span class="input-value"><span id="returnDisplay">3.0</span>%</span>
+          </div>
+          <input type="range" id="returnRate" min="2" max="10" step="0.5" value="3">
+          <p style="font-size:12px;color:var(--ink-soft);margin-top:6px;">3% is conservative for a globally diversified index fund. Raise to 5–7% for a more optimistic view.</p>
+        </div>
+
+        <div class="input-row">
+          <div class="input-label">
+            <span>One-off cost of the move</span>
+            <span class="input-value">NZ$<span id="moveDisplay">7,000</span></span>
+          </div>
+          <input type="range" id="moveCost" min="2000" max="20000" step="500" value="7000">
+          <p style="font-size:12px;color:var(--ink-soft);margin-top:6px;">Flights, bond, 2 weeks Airbnb, IKEA basics. Adjust higher if shipping furniture.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="wizard-controls">
+      <button class="btn-back" onclick="setStep(2)">← Back</button>
+      <button class="btn-next" onclick="setStep(4)">See The Verdict →</button>
+    </div>
+  </div>
+
+  <!-- ===== STEP 4: Results ===== -->
+  <div id="step-4" class="step-section">
+
+    <!-- VERDICT -->
+    <div class="verdict" id="verdict">
+      <p class="verdict-label">The bottom line</p>
+      <h2 class="verdict-headline" id="verdictHeadline">Crunching the numbers…</h2>
+      <p class="verdict-detail" id="verdictDetail">Adjust the inputs to see how the move stacks up for you.</p>
+    </div>
+
+    <!-- QUICK STATS -->
+    <div class="quick-stats">
+      <div class="qs-card">
+        <div class="qs-label">Year-1 lead</div>
+        <div class="qs-value" id="qsYear1">—</div>
+        <div class="qs-sub">After the cost of moving (in NZD)</div>
+      </div>
+      <div class="qs-card">
+        <div class="qs-label">Wealth gap</div>
+        <div class="qs-value" id="qsTotal">—</div>
+        <div class="qs-sub">Total difference over <span id="qsYearsLabel">10</span> years</div>
+      </div>
+      <div class="qs-card">
+        <div class="qs-label">NZ loan cleared</div>
+        <div class="qs-value" id="qsNzLoan">—</div>
+        <div class="qs-sub">NZ: yr <span id="qsNzLoanYr">—</span> · AU: yr <span id="qsAuLoanYr">—</span> at minimum repayments</div>
+      </div>
+      <div class="qs-card">
+        <div class="qs-label">AU employer super</div>
+        <div class="qs-value" id="qsSuper">—</div>
+        <div class="qs-sub">Annual employer contribution (12%), in NZD</div>
+      </div>
+    </div>
+
+    <!-- BREAKDOWN SECTION -->
+    <div class="section-header">
+      <span class="section-num">02. The breakdown</span>
+      <h2>What you actually <em>take home</em></h2>
+      <p>Year-one cash flow. Tap the <strong>?</strong> icons to understand each line item. All figures shown in local currency.</p>
+    </div>
+
+    <div class="comparison-grid">
+      <!-- NZ CARD -->
+      <div class="country-card nz">
+        <span class="country-flag">New Zealand</span>
+        <h3 class="country-title">Staying put</h3>
+        <p class="country-city">Christchurch, flatting</p>
+
+        <div class="breakdown-row">
+          <span class="breakdown-label">Gross salary</span>
+          <span class="breakdown-value" id="nzGross">NZ$70,000</span>
+        </div>
+        <div class="breakdown-row negative">
+          <span class="breakdown-label">
+            Income tax (PAYE)
+            <button class="tip-btn" onclick="toggleTip(this)">?<span class="tip-content">Pay As You Earn — NZ income tax withheld by your employer. Rates run from 10.5% on your first $15,600 up to 39% above $180,000. These are the updated July 2024 brackets.</span></button>
+          </span>
+          <span class="breakdown-value" id="nzTax">−NZ$13,221</span>
+        </div>
+        <div class="breakdown-row negative">
+          <span class="breakdown-label">
+            ACC earner levy
+            <button class="tip-btn" onclick="toggleTip(this)">?<span class="tip-content">Accident Compensation Corporation levy (1.67%). This pays for your no-fault accident cover in NZ — if you're injured in an accident, ACC covers your medical costs and lost income regardless of fault. There's no equivalent in Australia.</span></button>
+          </span>
+          <span class="breakdown-value" id="nzAcc">−NZ$1,169</span>
+        </div>
+        <div class="breakdown-row negative">
+          <span class="breakdown-label">
+            Student loan (12% above threshold)
+            <button class="tip-btn" onclick="toggleTip(this)">?<span class="tip-content">NZ student loans are interest-free while you live in NZ. You repay 12% of every dollar you earn above the $24,128 annual threshold — automatically deducted through PAYE alongside your income tax.</span></button>
+          </span>
+          <span class="breakdown-value" id="nzLoan">−NZ$5,505</span>
+        </div>
+        <div class="breakdown-row negative">
+          <span class="breakdown-label">
+            KiwiSaver (your 3%)
+            <button class="tip-btn" onclick="toggleTip(this)">?<span class="tip-content">KiwiSaver is NZ's voluntary retirement savings scheme. Your 3% goes into your personal account — it's not lost, it's your money. Your employer also contributes 3% (shown below), and the government adds up to $521/yr on top.</span></button>
+          </span>
+          <span class="breakdown-value" id="nzKs">−NZ$2,100</span>
+        </div>
+        <div class="breakdown-row subtotal">
+          <span class="breakdown-label">Take-home</span>
+          <span class="breakdown-value" id="nzTakehome">NZ$48,005</span>
+        </div>
+        <div class="breakdown-row negative">
+          <span class="breakdown-label">Rent (annual, 52 weeks)</span>
+          <span class="breakdown-value" id="nzRentAnnual">−NZ$11,440</span>
+        </div>
+        <div class="breakdown-row negative">
+          <span class="breakdown-label">Other living costs (annual)</span>
+          <span class="breakdown-value" id="nzLivingAnnual">−NZ$14,040</span>
+        </div>
+        <div class="breakdown-row subtotal positive">
+          <span class="breakdown-label">Annual cash savings</span>
+          <span class="breakdown-value" id="nzSavings">NZ$22,525</span>
+        </div>
+        <div class="breakdown-row" style="margin-top:14px;padding-top:14px;border-top:1px dashed rgba(26,40,65,0.1);">
+          <span class="breakdown-label">
+            Employer & govt KiwiSaver
+            <button class="tip-btn" onclick="toggleTip(this)">?<span class="tip-content">Your employer contributes another 3% of your salary into KiwiSaver (taxed at ESCT rate), and the government matches up to $521/yr. This is on top of your own 3% shown above. All of this grows in your KiwiSaver account until age 65.</span></button>
+          </span>
+          <span class="breakdown-value" id="nzSuper">NZ$1,991</span>
+        </div>
+      </div>
+
+      <!-- AU CARD -->
+      <div class="country-card au">
+        <span class="country-flag">Australia</span>
+        <h3 class="country-title">Crossing the ditch</h3>
+        <p class="country-city">Brisbane, flatting</p>
+
+        <div class="breakdown-row">
+          <span class="breakdown-label">Gross salary</span>
+          <span class="breakdown-value" id="auGross">AU$85,000</span>
+        </div>
+        <div class="breakdown-row negative">
+          <span class="breakdown-label">
+            Income tax
+            <button class="tip-btn" onclick="toggleTip(this)">?<span class="tip-content">Australian income tax (2025-26, Stage 3 rates). 0% up to $18,200 · 16% up to $45,000 · 30% up to $135,000 · 37% up to $190,000 · 45% above. These are lower rates than NZ for many mid-range incomes.</span></button>
+          </span>
+          <span class="breakdown-value" id="auTax">−AU$16,288</span>
+        </div>
+        <div class="breakdown-row negative">
+          <span class="breakdown-label">
+            Medicare levy (2%)
+            <button class="tip-btn" onclick="toggleTip(this)">?<span class="tip-content">A flat 2% levy that funds Australia's universal healthcare system (Medicare). It covers GP visits and public hospital care, but bulk-billing GPs are harder to find in Brisbane — budget AU$60–90 per private GP visit if needed.</span></button>
+          </span>
+          <span class="breakdown-value" id="auMedicare">−AU$1,700</span>
+        </div>
+        <div class="breakdown-row negative">
+          <span class="breakdown-label">
+            NZ student loan (overseas minimum)
+            <button class="tip-btn" onclick="toggleTip(this)">?<span class="tip-content">Your NZ student loan follows you overseas. Interest of 5.6%/yr starts accruing from the day you leave. IRD requires a minimum annual repayment based on your balance — you cannot use income-based repayments from abroad. See the callout below for what this means long-term.</span></button>
+          </span>
+          <span class="breakdown-value" id="auLoan">−AU$2,453</span>
+        </div>
+        <div class="breakdown-row subtotal">
+          <span class="breakdown-label">Take-home</span>
+          <span class="breakdown-value" id="auTakehome">AU$62,512</span>
+        </div>
+        <div class="breakdown-row negative">
+          <span class="breakdown-label">Rent (annual, 52 weeks)</span>
+          <span class="breakdown-value" id="auRentAnnual">−AU$15,600</span>
+        </div>
+        <div class="breakdown-row negative">
+          <span class="breakdown-label">Other living costs (annual)</span>
+          <span class="breakdown-value" id="auLivingAnnual">−AU$19,440</span>
+        </div>
+        <div class="breakdown-row subtotal positive">
+          <span class="breakdown-label">Annual cash savings</span>
+          <span class="breakdown-value" id="auSavings">AU$27,472</span>
+        </div>
+        <div class="breakdown-row" style="margin-top:14px;padding-top:14px;border-top:1px dashed rgba(26,40,65,0.1);">
+          <span class="breakdown-label">
+            Employer Super (12%, after 15% tax)
+            <button class="tip-btn" onclick="toggleTip(this)">?<span class="tip-content">Australia's Superannuation Guarantee requires your employer to contribute 12% of your salary into your super fund — completely separate from your pay. A 15% contributions tax is deducted before it lands in your account. This is a significant long-term wealth builder and is far more generous than NZ's 3% employer KiwiSaver match.</span></button>
+          </span>
+          <span class="breakdown-value" id="auSuper">AU$8,670</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- LOAN INSIGHT CALLOUT -->
+    <div class="insight-card" id="loanInsightCard">
+      <span class="insight-icon">⚠️</span>
+      <div>
+        <strong>Your NZ loan from Australia</strong>
+        <p id="loanInsightText">Loading…</p>
+      </div>
+    </div>
+
+    <!-- WEALTH CHART -->
+    <div class="chart-card">
+      <h3>Wealth over time</h3>
+      <p class="chart-sub">Cumulative net financial position — annual savings invested at your chosen return rate, including employer retirement contributions. Converted to NZD for a like-for-like comparison.</p>
+      <div class="chart-wrap tall">
+        <canvas id="wealthChart"></canvas>
+      </div>
+      <div style="margin-top:32px;">
+        <div class="input-row" style="background:var(--cream);padding:16px;border-radius:var(--radius-sm);">
+          <div class="input-label">
+            <span>Years to model</span>
+            <span class="input-value"><span id="yearsDisplay">10</span></span>
+          </div>
+          <input type="range" id="years" min="1" max="40" step="1" value="10">
+        </div>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <h3>Where your salary goes, year one</h3>
+      <p class="chart-sub">Everything converted to NZD at the exchange rate above, so you can compare like-for-like</p>
+      <div class="chart-wrap">
+        <canvas id="breakdownChart"></canvas>
+      </div>
+    </div>
+
+    <!-- SOURCES -->
+    <div class="section-header">
+      <span class="section-num">04. The receipts</span>
+      <h2>Where every number <em>comes from</em></h2>
+      <p>All sources are publicly available and current as of May 2026. Override anything that doesn't match your specific case.</p>
+    </div>
+
+    <div class="sources-card">
+      <table class="sources-table">
+        <thead>
+          <tr><th>Input</th><th>Default value</th><th>Source</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="input-name">NZ income tax brackets</td><td>10.5% / 17.5% / 30% / 33% / 39%</td><td class="input-source"><a href="https://www.ird.govt.nz/income-tax/income-tax-for-individuals/tax-codes-and-tax-rates-for-individuals/tax-rates-for-individuals" target="_blank">IRD, 2025/26 tax year (updated July 2024)</a></td></tr>
+          <tr><td class="input-name">ACC earner levy</td><td>1.67%, capped at NZ$139,892</td><td class="input-source">ACC, 2026/27 rate</td></tr>
+          <tr><td class="input-name">NZ student loan threshold</td><td>NZ$24,128, 12% above</td><td class="input-source"><a href="https://www.calculate.co.nz/reference/nz-student-loan-rates.php" target="_blank">IRD, 2026 tax year</a></td></tr>
+          <tr><td class="input-name">NZ student loan interest, in NZ</td><td>0%</td><td class="input-source">IRD, since 1 April 2006</td></tr>
+          <tr><td class="input-name">NZ student loan interest, overseas</td><td>5.6% (up from 4.9% in 2025, 3.3% in 2024)</td><td class="input-source"><a href="https://www.interest.co.nz/personal-finance/137823" target="_blank">interest.co.nz, March 2026</a></td></tr>
+          <tr><td class="input-name">IRD overseas minimum repayments</td><td>$1k–$5k/yr tiers based on balance</td><td class="input-source">IRD overseas borrower obligations</td></tr>
+          <tr><td class="input-name">KiwiSaver</td><td>3% employee, 3% employer, up to $521 govt</td><td class="input-source">IRD, KiwiSaver Act</td></tr>
+          <tr><td class="input-name">AU income tax brackets</td><td>0% / 16% / 30% / 37% / 45%</td><td class="input-source"><a href="https://www.ato.gov.au/" target="_blank">ATO, 2025/26 financial year (Stage 3)</a></td></tr>
+          <tr><td class="input-name">AU Medicare levy</td><td>2% on taxable income</td><td class="input-source">ATO, 2025/26</td></tr>
+          <tr><td class="input-name">AU Superannuation Guarantee</td><td>12% employer contribution, 15% contributions tax</td><td class="input-source">ATO, 2025/26 SG rate</td></tr>
+          <tr><td class="input-name">NZ MSc microbiologist starting salary</td><td>NZ$70,000</td><td class="input-source">PayScale, ERI SalaryExpert, Randstad midpoint, May 2026</td></tr>
+          <tr><td class="input-name">AU MSc biotech starting salary</td><td>AU$85,000</td><td class="input-source">ERI SalaryExpert, Glassdoor, AusBiotech, May 2026</td></tr>
+          <tr><td class="input-name">Christchurch room rent (flatting)</td><td>NZ$220/week</td><td class="input-source">Trade Me Property, observed market 2025-26</td></tr>
+          <tr><td class="input-name">Brisbane room rent (flatting)</td><td>AU$300/week</td><td class="input-source"><a href="https://bambooroutes.com/blogs/news/brisbane-rents" target="_blank">SQM Research, Domain, Bamboo Routes, Jan 2026</a></td></tr>
+          <tr><td class="input-name">NZ visa for Aussie</td><td>None required</td><td class="input-source">SCV 444 granted automatically on arrival</td></tr>
+          <tr><td class="input-name">Cost of light-baggage move</td><td>NZ$5,800–8,200 (default $7,000)</td><td class="input-source">Flights, bond, 2 weeks Airbnb, IKEA basics</td></tr>
+          <tr><td class="input-name">Exchange rate</td><td>1 AUD = 1.223 NZD</td><td class="input-source">Expatistan, mid-May 2026</td></tr>
+          <tr><td class="input-name">Investment return assumption</td><td>3% real, after inflation and fees</td><td class="input-source">Long-run global equity returns, conservative</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- CAVEATS -->
+    <div class="section-header">
+      <span class="section-num">05. The squishy bits</span>
+      <h2>What this calculator <em>doesn't</em> capture</h2>
+      <p>Numbers don't tell the whole story. The case for staying or going has dimensions a spreadsheet cannot model.</p>
+    </div>
+
+    <ul class="caveat-list">
+      <li><strong>Family, friends, identity.</strong> The most important variable is also the hardest to put in a column. Distance from home, family, surf breaks, and the country that shaped you is a real cost. Different people weight it differently. The calculator does not.</li>
+      <li><strong>Housing competition in Brisbane.</strong> Vacancy is 0.6% in Brisbane as of March 2026. You will queue at flat viewings alongside thirty other applicants. The bond and Airbnb numbers assume you find something within two to three weeks. If it takes longer, add accordingly.</li>
+      <li><strong>Job market access.</strong> The calculator assumes you can land a fresh-MSc role in either country at the salary you set. Australia has roughly ten times more biotech jobs advertised per capita than NZ does in microbiology. Probability of landing matters, and the calculator treats it as 100%.</li>
+      <li><strong>Career trajectory.</strong> Year-one salaries are one thing. Five-year salaries are another. The Australian biotech and pharma sector grows ladders for graduates that NZ largely does not. The honest 10-year picture is wider than this calculator shows.</li>
+      <li><strong>Tax residency complexity.</strong> If you have NZ investments, dividend income, or rental property while in Australia, double-tax treaty rules apply. Worth talking to an accountant before you leave.</li>
+      <li><strong>Healthcare and ACC.</strong> NZ has ACC, which Australia does not. Australian Medicare covers GP visits but waiting times for bulk-billed clinics in Brisbane are real. Budget AU$60–90 per visit if you need private. Not modelled here.</li>
+      <li><strong>The British passport option.</strong> For those who hold one (or any EU/UK working right), the UK biotech corridor is a third option that pays similarly to AU, sits in a similar timezone to home, and avoids the trans-Tasman calculus entirely. Worth a separate calculation.</li>
+      <li><strong>Option value.</strong> Being in Brisbane gives you an easier pivot to Sydney, Melbourne, London, or the US than being in Christchurch does. That optionality has real value. Hard to quantify but it is positive on the Australia side.</li>
+    </ul>
+
+    <!-- SHARE SECTION -->
+    <div class="share-section">
+      <h3>Share your result</h3>
+      <p>Helpful for others weighing the same move — send it to a friend or post it to LinkedIn.</p>
+      <div class="share-buttons">
+        <button onclick="shareToLinkedIn()" class="share-btn share-btn-linkedin">Share on LinkedIn</button>
+        <button onclick="copyLink()" class="share-btn share-btn-copy" id="copyBtn">Copy link</button>
+      </div>
+    </div>
+
+    <div class="wizard-controls" style="justify-content:center;margin-bottom:80px;">
+      <button class="btn-back" onclick="setStep(1)">Start Over</button>
+      <button class="btn-back" onclick="setStep(3)">Adjust Expenses</button>
+    </div>
+  </div><!-- end step-4 -->
+
+  <footer>
+    <p>Built with publicly available data, May 2026. Sources cited inline above.</p>
+    <p class="signature">A trans-Tasman number-cruncher</p>
+  </footer>
+</div><!-- end container -->
+
+
+<script src="js/app.js" defer></script>
+
+</body>
+</html>
