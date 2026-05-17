@@ -339,6 +339,17 @@ function updateUI() {
   document.getElementById('auTax').textContent          = fmtNeg(r.au.tax, 'AU$');
   document.getElementById('auMedicare').textContent     = fmtNeg(r.au.medicare, 'AU$');
   document.getElementById('auLoan').textContent         = fmtNeg(r.au.slPayment, 'AU$');
+  const auInterestRow = document.getElementById('auInterestRow');
+  const auInterestEl  = document.getElementById('auInterest');
+  if (auInterestRow && auInterestEl) {
+    if (state.loan > 0) {
+      const annualInterestNZD = Math.round(state.loan * 0.056);
+      auInterestRow.style.display = '';
+      auInterestEl.textContent = `+NZ$${annualInterestNZD.toLocaleString()}`;
+    } else {
+      auInterestRow.style.display = 'none';
+    }
+  }
   document.getElementById('auTakehome').textContent     = fmt(r.au.takehome, 'AU$');
   document.getElementById('auRentAnnual').textContent   = fmtNeg(r.au.rent, 'AU$');
   document.getElementById('auLivingAnnual').textContent = fmtNeg(r.au.living, 'AU$');
@@ -433,14 +444,16 @@ function updateUI() {
   const yearOneDelta = annualDelta - state.moveCost;
   const finalDelta   = wealthData.au[wealthData.au.length - 1] - wealthData.nz[wealthData.nz.length - 1];
 
-  // Verdict preview bar (steps 1–3)
+  // Verdict preview bar (steps 1–3) — use N-year total so loan balance affects the number
   const vpValueEl = document.getElementById('vpValue');
+  const vpLabelEl = document.getElementById('vpLabel');
   if (vpValueEl) {
-    if (annualDelta > 0) {
-      vpValueEl.textContent = `AU leads by NZ$${Math.round(annualDelta).toLocaleString()}/yr`;
+    if (vpLabelEl) vpLabelEl.textContent = `OVER ${state.years} YEARS`;
+    if (finalDelta > 0) {
+      vpValueEl.textContent = `AU ahead by NZ$${Math.abs(Math.round(finalDelta)).toLocaleString()}`;
       vpValueEl.className = 'vp-value au-win';
     } else {
-      vpValueEl.textContent = `NZ leads by NZ$${Math.round(-annualDelta).toLocaleString()}/yr`;
+      vpValueEl.textContent = `NZ ahead by NZ$${Math.abs(Math.round(finalDelta)).toLocaleString()}`;
       vpValueEl.className = 'vp-value nz-win';
     }
   }

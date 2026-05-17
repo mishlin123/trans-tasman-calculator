@@ -359,10 +359,17 @@
         </div>
         <div class="breakdown-row negative">
           <span class="breakdown-label">
-            NZ student loan (overseas minimum)
-            <button class="tip-btn" onclick="toggleTip(this)">?<span class="tip-content">Your NZ student loan follows you overseas. Interest of 5.6%/yr starts accruing from the day you leave. IRD requires a minimum annual repayment based on your balance — you cannot use income-based repayments from abroad. See the callout below for what this means long-term.</span></button>
+            NZ student loan repayment
+            <button class="tip-btn" onclick="toggleTip(this)">?<span class="tip-content">Your NZ student loan follows you overseas. 5.6%/yr interest accrues from the day you leave. You pay 12% of your AU income (converted to NZD) above the $24,128 threshold — same formula as NZ, but the interest is the killer.</span></button>
           </span>
           <span class="breakdown-value" id="auLoan">−AU$2,453</span>
+        </div>
+        <div class="breakdown-row negative" id="auInterestRow" style="display:none">
+          <span class="breakdown-label">
+            Interest added to loan balance (5.6%/yr)
+            <button class="tip-btn" onclick="toggleTip(this)">?<span class="tip-content">This interest isn't a cash payment — it's silently added to your loan balance each year. It means your loan grows faster than you repay it, costing you more over time and delaying when you're debt-free. There's no equivalent in NZ where the loan is interest-free.</span></button>
+          </span>
+          <span class="breakdown-value" id="auInterest" style="color:var(--terracotta)">+NZ$1,960</span>
         </div>
         <div class="breakdown-row subtotal">
           <span class="breakdown-label">Take-home</span>
@@ -504,7 +511,7 @@
 <!-- Verdict preview bar (fixed bottom, visible on steps 1–3) -->
 <div id="verdictPreview" class="verdict-preview">
   <div>
-    <div class="vp-label">Current estimate</div>
+    <div class="vp-label" id="vpLabel">OVER 10 YEARS</div>
     <div class="vp-value" id="vpValue">—</div>
   </div>
   <button class="vp-cta" onclick="setStep(4)">See full verdict →</button>
