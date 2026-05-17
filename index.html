@@ -116,9 +116,9 @@
         </div>
         <p style="font-size:13px;color:var(--ink-soft);margin-top:4px;">Set to $0 if you have no loan or it's already paid off.</p>
 
-        <div class="input-row" style="margin-top:20px;padding-top:16px;border-top:1px dashed rgba(26,40,65,0.1);">
+        <div id="auLoanExtraRow" class="input-row" style="margin-top:20px;padding-top:16px;border-top:1px dashed rgba(26,40,65,0.1);">
           <div class="input-label">
-            <span>Extra AU repayment per year (above 12% base)</span>
+            <span>Extra AU repayment/yr (above 12% base)</span>
             <span class="input-value">+NZ$<span id="auLoanExtraDisplay">0</span></span>
           </div>
           <input type="range" id="auLoanExtra" min="0" max="20000" step="500" value="0">
@@ -127,8 +127,8 @@
       </div>
 
       <div class="input-card">
-        <h3>Your housing</h3>
-        <p class="card-hint">Typical room rent in a shared flat. Rent is per week; all other costs per month.</p>
+        <h3>Your housing & living</h3>
+        <p class="card-hint">Room rent per week. Other living costs use typical figures — tap Customise to adjust.</p>
 
         <div class="input-row">
           <div class="input-label"><span>NZ rent (per week)</span><span class="input-value">NZ$<span id="nzRentDisplay">220</span></span></div>
@@ -139,40 +139,53 @@
           <input type="range" id="auRent" min="150" max="600" step="10" value="300">
         </div>
 
-        <div class="input-row">
-          <div class="input-label"><span>Food & groceries — NZ (per month)</span><span class="input-value">NZ$<span id="nzFoodDisplay">400</span></span></div>
-          <input type="range" id="nzFood" min="200" max="1000" step="10" value="400">
-        </div>
-        <div class="input-row">
-          <div class="input-label"><span>Food & groceries — AU (per month)</span><span class="input-value">AU$<span id="auFoodDisplay">550</span></span></div>
-          <input type="range" id="auFood" min="200" max="1000" step="10" value="550">
-        </div>
-
-        <div class="input-row">
-          <div class="input-label"><span>Transport — NZ (per month)</span><span class="input-value">NZ$<span id="nzTransportDisplay">150</span></span></div>
-          <input type="range" id="nzTransport" min="0" max="500" step="10" value="150">
-        </div>
-        <div class="input-row">
-          <div class="input-label"><span>Transport — AU (per month)</span><span class="input-value">AU$<span id="auTransportDisplay">200</span></span></div>
-          <input type="range" id="auTransport" min="0" max="500" step="10" value="200">
+        <div class="costs-summary-row">
+          <div>
+            <div class="costs-summary-text">Other living costs</div>
+            <button class="costs-toggle-btn" id="costsToggleBtn" onclick="toggleCosts()">+ Customise</button>
+          </div>
+          <div class="costs-summary-vals">
+            <div>NZ: NZ$<span id="nzLivingSummary">1,170</span>/mo</div>
+            <div>AU: AU$<span id="auLivingSummary">1,620</span>/mo</div>
+          </div>
         </div>
 
-        <div class="input-row">
-          <div class="input-label"><span>Bills & utilities — NZ (per month)</span><span class="input-value">NZ$<span id="nzBillsDisplay">200</span></span></div>
-          <input type="range" id="nzBills" min="0" max="500" step="10" value="200">
-        </div>
-        <div class="input-row">
-          <div class="input-label"><span>Bills & utilities — AU (per month)</span><span class="input-value">AU$<span id="auBillsDisplay">250</span></span></div>
-          <input type="range" id="auBills" min="0" max="500" step="10" value="250">
-        </div>
+        <div id="detailedCosts" style="display:none">
+          <div class="input-row">
+            <div class="input-label"><span>Food & groceries — NZ (per month)</span><span class="input-value">NZ$<span id="nzFoodDisplay">400</span></span></div>
+            <input type="range" id="nzFood" min="200" max="1000" step="10" value="400">
+          </div>
+          <div class="input-row">
+            <div class="input-label"><span>Food & groceries — AU (per month)</span><span class="input-value">AU$<span id="auFoodDisplay">550</span></span></div>
+            <input type="range" id="auFood" min="200" max="1000" step="10" value="550">
+          </div>
 
-        <div class="input-row">
-          <div class="input-label"><span>Entertainment & misc — NZ (per month)</span><span class="input-value">NZ$<span id="nzEntDisplay">420</span></span></div>
-          <input type="range" id="nzEnt" min="0" max="1500" step="10" value="420">
-        </div>
-        <div class="input-row">
-          <div class="input-label"><span>Entertainment & misc — AU (per month)</span><span class="input-value">AU$<span id="auEntDisplay">620</span></span></div>
-          <input type="range" id="auEnt" min="0" max="1500" step="10" value="620">
+          <div class="input-row">
+            <div class="input-label"><span>Transport — NZ (per month)</span><span class="input-value">NZ$<span id="nzTransportDisplay">150</span></span></div>
+            <input type="range" id="nzTransport" min="0" max="500" step="10" value="150">
+          </div>
+          <div class="input-row">
+            <div class="input-label"><span>Transport — AU (per month)</span><span class="input-value">AU$<span id="auTransportDisplay">200</span></span></div>
+            <input type="range" id="auTransport" min="0" max="500" step="10" value="200">
+          </div>
+
+          <div class="input-row">
+            <div class="input-label"><span>Bills & utilities — NZ (per month)</span><span class="input-value">NZ$<span id="nzBillsDisplay">200</span></span></div>
+            <input type="range" id="nzBills" min="0" max="500" step="10" value="200">
+          </div>
+          <div class="input-row">
+            <div class="input-label"><span>Bills & utilities — AU (per month)</span><span class="input-value">AU$<span id="auBillsDisplay">250</span></span></div>
+            <input type="range" id="auBills" min="0" max="500" step="10" value="250">
+          </div>
+
+          <div class="input-row">
+            <div class="input-label"><span>Entertainment & misc — NZ (per month)</span><span class="input-value">NZ$<span id="nzEntDisplay">420</span></span></div>
+            <input type="range" id="nzEnt" min="0" max="1500" step="10" value="420">
+          </div>
+          <div class="input-row">
+            <div class="input-label"><span>Entertainment & misc — AU (per month)</span><span class="input-value">AU$<span id="auEntDisplay">620</span></span></div>
+            <input type="range" id="auEnt" min="0" max="1500" step="10" value="620">
+          </div>
         </div>
       </div>
 
@@ -487,6 +500,15 @@
   </footer>
 </div><!-- end container -->
 
+
+<!-- Verdict preview bar (fixed bottom, visible on steps 1–3) -->
+<div id="verdictPreview" class="verdict-preview">
+  <div>
+    <div class="vp-label">Current estimate</div>
+    <div class="vp-value" id="vpValue">—</div>
+  </div>
+  <button class="vp-cta" onclick="setStep(4)">See full verdict →</button>
+</div>
 
 <script src="js/app.js" defer></script>
 

@@ -151,7 +151,7 @@
 
   .industry-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
     gap: 12px;
     margin-bottom: 32px;
   }
@@ -387,7 +387,7 @@
   }
   .country-card.nz .country-flag { background: var(--nz-soft); color: var(--sage); }
   .country-card.au .country-flag { background: var(--au-soft); color: var(--terracotta); }
-  .country-title { font-family: 'Fraunces', serif; font-weight: 600; font-size: 28px; color: var(--ink); margin-bottom: 4px; }
+  .country-title { font-family: 'Fraunces', serif; font-weight: 600; font-size: 28px; color: var(--ink); margin-bottom: 4px; padding-right: 90px; }
   .country-city { font-family: 'Fraunces', serif; font-style: italic; color: var(--ink-soft); font-size: 16px; margin-bottom: 24px; }
   .breakdown-row {
     display: flex;
@@ -543,6 +543,60 @@
   .share-btn-linkedin:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0, 119, 181, 0.4); }
   .share-btn-copy { background: var(--cream); color: var(--ink); border: 1px solid rgba(26, 40, 65, 0.2); }
   .share-btn-copy:hover { background: var(--sand); }
+
+  /* ===== VERDICT PREVIEW BAR ===== */
+  .verdict-preview {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: var(--ink);
+    color: white;
+    padding: 14px 24px;
+    display: none;
+    align-items: center;
+    gap: 14px;
+    z-index: 200;
+    box-shadow: 0 -4px 24px rgba(26, 40, 65, 0.25);
+    animation: slideUp 0.3s ease;
+  }
+  @keyframes slideUp {
+    from { transform: translateY(100%); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+  }
+  .vp-label { font-size: 11px; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; flex-shrink: 0; white-space: nowrap; }
+  .vp-value { font-family: 'Fraunces', serif; font-size: 17px; font-weight: 600; font-style: italic; flex: 1; }
+  .vp-value.au-win { color: var(--sun); }
+  .vp-value.nz-win { color: #a8d5a7; }
+  .vp-cta { padding: 9px 16px; background: var(--terracotta); color: white; border: none; border-radius: 8px; font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 13px; cursor: pointer; flex-shrink: 0; white-space: nowrap; transition: background 0.15s; }
+  .vp-cta:hover { background: #b85a1a; }
+  body.show-preview { padding-bottom: 72px; }
+
+  /* ===== COLLAPSIBLE LIVING COSTS ===== */
+  .costs-summary-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 0 10px;
+    margin-top: 8px;
+    border-top: 1px dashed rgba(26,40,65,0.1);
+    gap: 12px;
+  }
+  .costs-summary-text { font-size: 14px; color: var(--ink-soft); }
+  .costs-summary-vals { font-size: 13px; color: var(--ink-soft); text-align: right; line-height: 1.6; white-space: nowrap; }
+  .costs-toggle-btn {
+    display: inline-block;
+    margin-top: 6px;
+    font-size: 13px;
+    font-family: 'Manrope', sans-serif;
+    font-weight: 700;
+    color: var(--terracotta);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    letter-spacing: 0.01em;
+  }
+  .costs-toggle-btn:hover { text-decoration: underline; }
+  #detailedCosts { padding-top: 4px; }
 
   /* ===== FOOTER ===== */
   footer { margin-top: 60px; padding: 40px 0 60px; border-top: 1px solid rgba(26, 40, 65, 0.1); text-align: center; color: var(--ink-soft); font-size: 14px; }

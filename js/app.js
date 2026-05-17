@@ -61,7 +61,17 @@ function setStep(stepNum) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
   renderProgress(stepNum);
-  if (stepNum === 4) updateUI();
+  updateUI();
+  const preview = document.getElementById('verdictPreview');
+  if (preview) {
+    if (stepNum < 4) {
+      preview.style.display = 'flex';
+      document.body.classList.add('show-preview');
+    } else {
+      preview.style.display = 'none';
+      document.body.classList.remove('show-preview');
+    }
+  }
 }
 
 function applyPreset() {
@@ -84,6 +94,15 @@ document.addEventListener('click', e => {
     document.querySelectorAll('.tip-btn.open').forEach(b => b.classList.remove('open'));
   }
 });
+
+// ============ COLLAPSIBLE LIVING COSTS ============
+function toggleCosts() {
+  const panel = document.getElementById('detailedCosts');
+  const btn   = document.getElementById('costsToggleBtn');
+  const open  = panel.style.display !== 'none';
+  panel.style.display = open ? 'none' : 'block';
+  btn.textContent = open ? '+ Customise' : '− Close';
+}
 
 // ============ TAX FUNCTIONS ============
 function nzTax(income) {
@@ -279,6 +298,18 @@ function updateUI() {
   document.getElementById('moveDisplay').textContent         = state.moveCost.toLocaleString();
   document.getElementById('auLoanExtraDisplay').textContent  = state.auLoanExtra.toLocaleString();
 
+  // Living cost summaries (shown in collapsed costs row)
+  const nzLivingTotal = state.nzFood + state.nzTransport + state.nzBills + state.nzEnt;
+  const auLivingTotal = state.auFood + state.auTransport + state.auBills + state.auEnt;
+  const nzLivSumEl = document.getElementById('nzLivingSummary');
+  const auLivSumEl = document.getElementById('auLivingSummary');
+  if (nzLivSumEl) nzLivSumEl.textContent = nzLivingTotal.toLocaleString();
+  if (auLivSumEl) auLivSumEl.textContent = auLivingTotal.toLocaleString();
+
+  // Show/hide extra AU loan repayment row
+  const auLoanExtraRow = document.getElementById('auLoanExtraRow');
+  if (auLoanExtraRow) auLoanExtraRow.style.display = state.loan > 0 ? '' : 'none';
+
   // Base AU loan rate note + cap warning
   const baseRateNZD   = Math.round(nzStudentLoanPayment(state.auSalary * state.fx));
   const auAvailNote   = Math.round((state.auSalary - r.au.tax - r.au.medicare - r.au.rent - r.au.living) * state.fx);
@@ -366,6 +397,8 @@ function updateUI() {
     const nzYearGain    = nzSavingsY + nzKsEmpY + nzKsErNetY + nzKsGovtY; // total wealth inc. KiwiSaver
 
     // --- AU: fully recalculate from growing salary ---
+    const auTaxY = auTax(auSalY);
+    const auMedY = auSalY * 0.02;
     let auPaymentNZD = 0;
     if (auLoanBal > 0) {
       const interestNZD    = auLoanBal * 0.056;
@@ -378,8 +411,6 @@ function updateUI() {
       auLoanBal           -= auPaymentNZD;
       if (auLoanBal < 0) auLoanBal = 0;
     }
-    const auTaxY     = auTax(auSalY);
-    const auMedY     = auSalY * 0.02;
     const auNetY     = auSalY - auTaxY - auMedY;
     const auSavingsY = auNetY - (auPaymentNZD / fx) - r.au.rent - r.au.living;
     const auSuperY   = auSalY * 0.12 * 0.85;
@@ -401,6 +432,18 @@ function updateUI() {
   const annualDelta  = firstYearAuGain - firstYearNzGain;
   const yearOneDelta = annualDelta - state.moveCost;
   const finalDelta   = wealthData.au[wealthData.au.length - 1] - wealthData.nz[wealthData.nz.length - 1];
+
+  // Verdict preview bar (steps 1–3)
+  const vpValueEl = document.getElementById('vpValue');
+  if (vpValueEl) {
+    if (annualDelta > 0) {
+      vpValueEl.textContent = `AU leads by NZ$${Math.round(annualDelta).toLocaleString()}/yr`;
+      vpValueEl.className = 'vp-value au-win';
+    } else {
+      vpValueEl.textContent = `NZ leads by NZ$${Math.round(-annualDelta).toLocaleString()}/yr`;
+      vpValueEl.className = 'vp-value nz-win';
+    }
+  }
 
   // Quick stats
   document.getElementById('qsYearsLabel').textContent = state.years;
@@ -609,4 +652,10 @@ document.addEventListener('DOMContentLoaded', () => {
   initCharts();
   bindInputs();
   updateUI();
+  // Show preview bar on initial load (step 1)
+  const preview = document.getElementById('verdictPreview');
+  if (preview) {
+    preview.style.display = 'flex';
+    document.body.classList.add('show-preview');
+  }
 });
