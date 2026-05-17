@@ -205,9 +205,11 @@ function calculate() {
   const nzRetireWealth    = nzKsEmployee + nzKsEmployerNet + nzKsGovt;     // used in wealth chart (employee KiwiSaver cancels out correctly)
 
   // --- AU side (all AUD, converted to NZD for wealth chart) ---
-  const auGross      = state.auSalary;
-  const auIncomeTax  = auTax(auGross);
-  const auMedicare   = auGross * 0.02;
+  const auGross        = state.auSalary;
+  const auIncomeTax    = auTax(auGross);
+  const auMedicare     = auGross * 0.02;
+  const auRentAnnual   = state.auRent * 52;
+  const auLivingAnnual = (state.auFood + state.auTransport + state.auBills + state.auEnt) * 12;
 
   // AU loan year-1 snapshot: 12% of AU income (in NZD) above NZD threshold + voluntary extra
   // 5.6% interest still accrues on the balance; repayment is capped at disposable income
@@ -216,16 +218,14 @@ function calculate() {
   const auInterestNZD      = state.loan * 0.056;
   const auLoanPostInterest = state.loan + auInterestNZD;
   const auTargetNZD        = auBaseLoanNZD + state.auLoanExtra;
-  const auAvailNZD         = (auGross - auIncomeTax - auMedicare) * fx - auRentAnnual - auLivingAnnual;
+  const auAvailNZD         = (auGross - auIncomeTax - auMedicare - auRentAnnual - auLivingAnnual) * fx;
   const auSLPaymentNZD     = state.loan > 0
     ? Math.min(auLoanPostInterest, Math.min(auTargetNZD, Math.max(0, auAvailNZD)))
     : 0;
   const auSLPayment        = auSLPaymentNZD / fx;
 
-  const auTakehome   = auGross - auIncomeTax - auMedicare - auSLPayment;
-  const auRentAnnual = state.auRent * 52;
-  const auLivingAnnual = (state.auFood + state.auTransport + state.auBills + state.auEnt) * 12;
-  const auSavings    = auTakehome - auRentAnnual - auLivingAnnual;
+  const auTakehome = auGross - auIncomeTax - auMedicare - auSLPayment;
+  const auSavings  = auTakehome - auRentAnnual - auLivingAnnual;
 
   // Super: 12% employer contribution, 15% contributions tax
   const auSuperNet   = auGross * 0.12 * 0.85;
@@ -281,7 +281,7 @@ function updateUI() {
 
   // Base AU loan rate note + cap warning
   const baseRateNZD   = Math.round(nzStudentLoanPayment(state.auSalary * state.fx));
-  const auAvailNote   = Math.round((state.auSalary - r.au.tax - r.au.medicare) * state.fx - r.au.rent - r.au.living);
+  const auAvailNote   = Math.round((state.auSalary - r.au.tax - r.au.medicare - r.au.rent - r.au.living) * state.fx);
   const effectivePay  = Math.min(baseRateNZD + state.auLoanExtra, Math.max(0, auAvailNote));
   const isCapped      = state.loan > 0 && (baseRateNZD + state.auLoanExtra) > auAvailNote;
   const noteEl = document.getElementById('auLoanBaseNote');
@@ -372,7 +372,7 @@ function updateUI() {
       auLoanBal           += interestNZD;
       const baseLoanNZDY   = nzStudentLoanPayment(auSalY * fx);
       const targetPayNZD   = baseLoanNZDY + state.auLoanExtra;
-      const auNetNZD       = (auSalY - auTaxY - auMedY) * fx - r.au.rent - r.au.living;
+      const auNetNZD       = (auSalY - auTaxY - auMedY - r.au.rent - r.au.living) * fx;
       const cappedPay      = Math.min(targetPayNZD, Math.max(0, auNetNZD));
       auPaymentNZD         = Math.min(auLoanBal, cappedPay);
       auLoanBal           -= auPaymentNZD;
