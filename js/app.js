@@ -64,7 +64,7 @@ function setStep(stepNum) {
   updateUI();
   const preview = document.getElementById('verdictPreview');
   if (preview) {
-    if (stepNum < 4) {
+    if (stepNum > 1 && stepNum < 4) {
       preview.style.display = 'flex';
       document.body.classList.add('show-preview');
     } else {
@@ -652,10 +652,4 @@ document.addEventListener('DOMContentLoaded', () => {
   initCharts();
   bindInputs();
   updateUI();
-  // Show preview bar on initial load (step 1)
-  const preview = document.getElementById('verdictPreview');
-  if (preview) {
-    preview.style.display = 'flex';
-    document.body.classList.add('show-preview');
-  }
 });
