@@ -20,6 +20,7 @@ const state = {
   returnRate: 3,
   salaryGrowth: 2,
   moveCost: 7000,
+  auLoanExtra: 0,
   fx: 1.223
 };
 
@@ -144,9 +145,9 @@ function nzEsctRate(gross) {
 }
 
 // ============ LOAN PAYOFF HELPER ============
-// Both NZ and AU payoff are modelled with salary growing at salaryGrowthRate % per year.
-// AU uses max(nzEquivRepayment, IRD overseas minimum) — never less than legally required.
-function calcLoanPayoff(loanBalance, nzSalary, salaryGrowthRate) {
+// Both sides modelled with salary growing at salaryGrowthRate % per year.
+// AU: 5.6% interest; 12% of AU income (in NZD) above threshold + voluntary extra.
+function calcLoanPayoff(loanBalance, nzSalary, auSalary, salaryGrowthRate, auLoanExtra, fx) {
   if (loanBalance <= 0) return { nzYears: 0, auYears: 0 };
   const gr = salaryGrowthRate / 100;
 
@@ -161,18 +162,18 @@ function calcLoanPayoff(loanBalance, nzSalary, salaryGrowthRate) {
     if (nzBal <= 0) break;
   }
 
-  // AU: 5.6% interest; pay the higher of the growing NZ-equivalent rate or the IRD minimum
-  let auBal = loanBalance, auYears = 0, auNzSal = nzSalary;
+  // AU: 5.6% interest; 12% of AU income (in NZD) above NZD threshold + voluntary extra
+  let auBal = loanBalance, auYears = 0, auSal = auSalary;
   while (auBal > 0 && auYears < 60) {
-    const nzRate = nzStudentLoanPayment(auNzSal);
-    const auMin  = auStudentLoanMinPayment(auBal);
-    const pay    = Math.max(nzRate, auMin);
     const interest = auBal * 0.056;
-    auBal = auBal + interest - pay;
+    auBal += interest;
+    const basePay = nzStudentLoanPayment(auSal * fx);
+    const pay = Math.min(auBal, basePay + auLoanExtra);
+    if (pay <= 0) { auYears = 999; break; }
+    auBal -= pay;
     auYears++;
-    auNzSal *= (1 + gr);
+    auSal *= (1 + gr);
     if (auBal <= 0) break;
-    // Safety: if loan is somehow still growing after 60 years, flag it
     if (auBal > loanBalance * 3) { auYears = 999; break; }
   }
 
@@ -208,10 +209,17 @@ function calculate() {
   const auIncomeTax  = auTax(auGross);
   const auMedicare   = auGross * 0.02;
 
-  // AU loan year-1 snapshot: pay the higher of NZ-equivalent rate or IRD overseas minimum
+  // AU loan year-1 snapshot: 12% of AU income (in NZD) above NZD threshold + voluntary extra
+  // 5.6% interest still accrues on the balance; repayment is capped at disposable income
+  const auIncomeNZD        = auGross * fx;
+  const auBaseLoanNZD      = nzStudentLoanPayment(auIncomeNZD);
   const auInterestNZD      = state.loan * 0.056;
   const auLoanPostInterest = state.loan + auInterestNZD;
-  const auSLPaymentNZD     = Math.min(auLoanPostInterest, Math.max(nzSLRunRate, auStudentLoanMinPayment(state.loan)));
+  const auTargetNZD        = auBaseLoanNZD + state.auLoanExtra;
+  const auAvailNZD         = (auGross - auIncomeTax - auMedicare) * fx - auRentAnnual - auLivingAnnual;
+  const auSLPaymentNZD     = state.loan > 0
+    ? Math.min(auLoanPostInterest, Math.min(auTargetNZD, Math.max(0, auAvailNZD)))
+    : 0;
   const auSLPayment        = auSLPaymentNZD / fx;
 
   const auTakehome   = auGross - auIncomeTax - auMedicare - auSLPayment;
@@ -269,6 +277,19 @@ function updateUI() {
   document.getElementById('returnDisplay').textContent       = state.returnRate.toFixed(1);
   document.getElementById('salaryGrowthDisplay').textContent = state.salaryGrowth.toFixed(1);
   document.getElementById('moveDisplay').textContent         = state.moveCost.toLocaleString();
+  document.getElementById('auLoanExtraDisplay').textContent  = state.auLoanExtra.toLocaleString();
+
+  // Base AU loan rate note + cap warning
+  const baseRateNZD   = Math.round(nzStudentLoanPayment(state.auSalary * state.fx));
+  const auAvailNote   = Math.round((state.auSalary - r.au.tax - r.au.medicare) * state.fx - r.au.rent - r.au.living);
+  const effectivePay  = Math.min(baseRateNZD + state.auLoanExtra, Math.max(0, auAvailNote));
+  const isCapped      = state.loan > 0 && (baseRateNZD + state.auLoanExtra) > auAvailNote;
+  const noteEl = document.getElementById('auLoanBaseNote');
+  if (noteEl) {
+    noteEl.textContent = isCapped
+      ? `Capped at NZ$${Math.max(0, auAvailNote).toLocaleString()} — your available cash after tax, rent and living. Base 12% rate would be NZ$${baseRateNZD.toLocaleString()}/yr.`
+      : `Base rate: NZ$${baseRateNZD.toLocaleString()}/yr (12% of your AU income in NZD above the $24,128 threshold). Repayment is capped at your remaining disposable income.`;
+  }
 
   // NZ breakdown card
   document.getElementById('nzGross').textContent        = fmt(r.nz.gross, 'NZ$');
@@ -294,17 +315,19 @@ function updateUI() {
   document.getElementById('auSuper').textContent        = fmt(r.au.retireEmployer, 'AU$');
 
   // Loan payoff insight (uses salary growth for realistic projection)
-  const payoff = calcLoanPayoff(state.loan, state.nzSalary, state.salaryGrowth);
+  const payoff = calcLoanPayoff(state.loan, state.nzSalary, state.auSalary, state.salaryGrowth, state.auLoanExtra, state.fx);
   const loanCard = document.getElementById('loanInsightCard');
   const loanText = document.getElementById('loanInsightText');
   if (state.loan > 0) {
     loanCard.style.display = 'flex';
     const interestPerYear = Math.round(state.loan * 0.056);
     const yr1NzRate       = Math.round(nzStudentLoanPayment(state.nzSalary));
-    const yr1AuPay        = Math.round(Math.max(yr1NzRate, auStudentLoanMinPayment(state.loan)));
+    const yr1AuBase       = Math.round(nzStudentLoanPayment(state.auSalary * state.fx));
+    const yr1AuTotal      = Math.round(Math.min(yr1AuBase + state.auLoanExtra, Math.max(0, effectivePay)));
     const growthNote      = state.salaryGrowth > 0 ? ` (rising with your ${state.salaryGrowth}%/yr salary growth)` : '';
     const auYrText        = payoff.auYears >= 60 ? '60+' : `~${payoff.auYears}`;
-    loanText.innerHTML = `Interest-free in NZ — cleared in <strong>~${payoff.nzYears} year${payoff.nzYears !== 1 ? 's' : ''}</strong>${growthNote}. From Australia: 5.6% interest (NZ$${interestPerYear.toLocaleString()}/yr on your opening balance) kicks in immediately. Paying NZ$${yr1AuPay.toLocaleString()}/yr in year one${growthNote}, the loan clears in <strong>${auYrText} years</strong>. That's ${payoff.auYears - payoff.nzYears > 0 ? `${payoff.auYears - payoff.nzYears} years longer than staying in NZ` : 'about the same as staying in NZ'} — the interest cost of living abroad.`;
+    const extraNote       = state.auLoanExtra > 0 ? ` plus NZ$${state.auLoanExtra.toLocaleString()} extra` : '';
+    loanText.innerHTML = `Interest-free in NZ — cleared in <strong>~${payoff.nzYears} year${payoff.nzYears !== 1 ? 's' : ''}</strong>${growthNote}. From Australia: 5.6% interest (NZ$${interestPerYear.toLocaleString()}/yr on your opening balance) kicks in immediately. Paying NZ$${yr1AuTotal.toLocaleString()}/yr${extraNote} in year one${growthNote}, the loan clears in <strong>${auYrText} years</strong>. That's ${payoff.auYears - payoff.nzYears > 0 ? `${payoff.auYears - payoff.nzYears} years longer than staying in NZ` : 'about the same as staying in NZ'}.`;
   } else {
     loanCard.style.display = 'none';
   }
@@ -345,13 +368,14 @@ function updateUI() {
     // --- AU: fully recalculate from growing salary ---
     let auPaymentNZD = 0;
     if (auLoanBal > 0) {
-      const nzRateForAuY = nzStudentLoanPayment(nzSalY);
-      const auMinY       = auStudentLoanMinPayment(auLoanBal);
-      const targetY      = Math.max(nzRateForAuY, auMinY);
-      const interestNZD  = auLoanBal * 0.056;
-      auLoanBal += interestNZD;
-      auPaymentNZD = Math.min(auLoanBal, targetY);
-      auLoanBal   -= auPaymentNZD;
+      const interestNZD    = auLoanBal * 0.056;
+      auLoanBal           += interestNZD;
+      const baseLoanNZDY   = nzStudentLoanPayment(auSalY * fx);
+      const targetPayNZD   = baseLoanNZDY + state.auLoanExtra;
+      const auNetNZD       = (auSalY - auTaxY - auMedY) * fx - r.au.rent - r.au.living;
+      const cappedPay      = Math.min(targetPayNZD, Math.max(0, auNetNZD));
+      auPaymentNZD         = Math.min(auLoanBal, cappedPay);
+      auLoanBal           -= auPaymentNZD;
       if (auLoanBal < 0) auLoanBal = 0;
     }
     const auTaxY     = auTax(auSalY);
@@ -552,7 +576,8 @@ function bindInputs() {
     'years':        v => state.years        = +v,
     'returnRate':   v => state.returnRate  = +v,
     'salaryGrowth': v => state.salaryGrowth = +v,
-    'moveCost':     v => state.moveCost    = +v
+    'moveCost':     v => state.moveCost    = +v,
+    'auLoanExtra':  v => state.auLoanExtra = +v
   };
   Object.entries(inputs).forEach(([id, setter]) => {
     const el = document.getElementById(id);

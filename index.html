@@ -115,6 +115,15 @@
           <input type="range" id="loan" min="0" max="100000" step="1000" value="35000">
         </div>
         <p style="font-size:13px;color:var(--ink-soft);margin-top:4px;">Set to $0 if you have no loan or it's already paid off.</p>
+
+        <div class="input-row" style="margin-top:20px;padding-top:16px;border-top:1px dashed rgba(26,40,65,0.1);">
+          <div class="input-label">
+            <span>Extra AU repayment per year (above 12% base)</span>
+            <span class="input-value">+NZ$<span id="auLoanExtraDisplay">0</span></span>
+          </div>
+          <input type="range" id="auLoanExtra" min="0" max="20000" step="500" value="0">
+          <p style="font-size:12px;color:var(--ink-soft);margin-top:6px;" id="auLoanBaseNote">Base rate: calculating…</p>
+        </div>
       </div>
 
       <div class="input-card">
@@ -231,7 +240,7 @@
       <div class="qs-card">
         <div class="qs-label">NZ loan cleared</div>
         <div class="qs-value" id="qsNzLoan">—</div>
-        <div class="qs-sub">NZ: yr <span id="qsNzLoanYr">—</span> · AU: yr <span id="qsAuLoanYr">—</span> at minimum repayments</div>
+        <div class="qs-sub">NZ: yr <span id="qsNzLoanYr">—</span> · AU: yr <span id="qsAuLoanYr">—</span></div>
       </div>
       <div class="qs-card">
         <div class="qs-label">AU employer super</div>
