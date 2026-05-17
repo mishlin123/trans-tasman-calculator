@@ -614,25 +614,85 @@
   }
   .pulse { animation: numberFlip 0.4s ease; }
 
-  /* ===== MOBILE ===== */
+  /* ===== DESKTOP ENHANCEMENTS ===== */
+  @media (min-width: 900px) {
+    /* Step 1: two-column layout — hero/text left, industry card right */
+    #step-1.step-active {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      column-gap: 64px;
+      align-items: start;
+    }
+    #step-1 .hero            { grid-column: 1; grid-row: 1; }
+    #step-1 .section-header  { grid-column: 1; grid-row: 2; }
+    #step-1 .step1-card      { grid-column: 2; grid-row: 1 / 5; max-width: none; margin-bottom: 0; }
+    #step-1 .wizard-controls { grid-column: 1; grid-row: 3; margin-top: 24px; justify-content: flex-start; }
+    #step-1 .skip-link       { grid-column: 1; grid-row: 4; text-align: left; }
+
+    /* Step 2: don't let the single salary card stretch across 1280px */
+    #step-2 .inputs-grid { max-width: 680px; }
+
+    /* Verdict preview bar: constrain content width */
+    .verdict-preview { padding: 14px 48px; gap: 24px; justify-content: center; }
+    .verdict-preview > div { flex: 0 1 auto; }
+    .vp-value { flex: 0; white-space: nowrap; }
+
+    /* Comparison cards — ensure they always sit side-by-side on desktop */
+    .comparison-grid { grid-template-columns: 1fr 1fr; }
+  }
+
+  /* ===== TABLET ===== */
   @media (max-width: 900px) {
     .comparison-grid { grid-template-columns: 1fr; }
     .quick-stats { grid-template-columns: 1fr 1fr; }
     .share-section { padding: 32px 28px; }
   }
+
+  /* ===== MOBILE ===== */
   @media (max-width: 640px) {
-    .hero { padding: 24px 0 0; }
+    /* Hero: hide sub-text (too long before first interaction) */
+    .hero { padding: 16px 0 0; }
+    .hero-sub { display: none; }
+
     .verdict { padding: 28px 24px; }
     .input-card { padding: 22px 18px; }
     .quick-stats { grid-template-columns: 1fr 1fr; gap: 12px; }
-    .wizard-controls { flex-direction: column-reverse; }
-    .btn-next, .btn-back { width: 100%; text-align: center; }
-    .skip-link { text-align: center; }
+
+    /* Nav controls: Next is primary (full-width top), Back is a subtle text link below */
+    .wizard-controls { flex-direction: column-reverse; gap: 4px; }
+    .btn-next { width: 100%; text-align: center; }
+    .btn-back {
+      width: 100%;
+      text-align: center;
+      border: none;
+      background: none;
+      font-size: 14px;
+      color: var(--ink-soft);
+      padding: 8px;
+      box-shadow: none;
+    }
+    .btn-back:hover { background: none; color: var(--ink); text-decoration: underline; }
+
+    .skip-link { text-align: center; margin-top: 4px; }
+
+    /* Progress bar: hide labels, shrink dots */
     .sp-label { display: none; }
     .sp-dot { width: 30px; height: 30px; font-size: 13px; }
+
+    /* Verdict preview bar: tighter on mobile */
+    .verdict-preview { padding: 10px 16px; gap: 10px; }
+    .vp-label { display: none; }
+    .vp-value { font-size: 15px; }
+    .vp-cta { padding: 8px 14px; font-size: 13px; }
+    body.show-preview { padding-bottom: 60px; }
+
+    /* Share buttons */
     .share-buttons { flex-direction: column; }
     .share-btn { width: 100%; }
+
+    /* Tooltip anchoring on narrow screens */
     .tip-btn .tip-content { left: auto; right: -8px; transform: none; }
     .tip-btn .tip-content::after { left: auto; right: 14px; transform: none; }
+
     .country-card { padding: 24px 20px; }
   }
